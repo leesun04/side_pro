@@ -1,3 +1,4 @@
 __pycache__/
 *.log
-routers/__pycache__/
+DB/my_data.db
+routers/__pycache__/ 

@@ -1,47 +1,54 @@
 import streamlit as st
-import time
 
-def signup_page():
-    # Page config should be set on the main page, but can be set here for standalone running
-    # st.set_page_config(page_title="FitSpot Seoul - 회원가입", page_icon="💪", layout="wide")
+# 페이지 설정
+st.set_page_config(page_title="Login Page", layout="centered")
 
-    # Centering the content
-    col1, col2, col3 = st.columns([1, 1, 1])
+# --- CSS 스타일 ---
+# 페이지의 모든 커스텀 스타일을 한 곳에 모아서 관리합니다.
+st.markdown("""
+<style>
+/* 'st-emotion-cache-xxx'와 같은 자동 생성 클래스 이름을 무시하고 data-testid를 사용합니다. */
+/* 'stButton'은 Streamlit 버튼의 data-testid 기본값입니다. */
+/* 'signup_button'은 우리가 지정한 key 값입니다. */
+[data-testid="stButton"] > button[data-testid="baseButton-secondary"] {
+    background-color: #28a745; /* 초록색 */
+    color: white;
+}
+</style>
+""", unsafe_allow_html=True) # unsafe_allow_html=True 옵션을 사용하여 HTML/CSS가 적용되도록 합니다.
 
-    with col2:
-        st.title("FitSpot Seoul 회원가입")
-        st.subheader("새로운 계정을 만들어 FitSpot의 모든 기능을 활용해보세요.")
-        st.markdown("---")
+# --- UI 구성 ---
+st.title("Login")
 
-        with st.form("signup_form", clear_on_submit=True):
-            st.markdown("#### 📝 계정 정보")
-            username = st.text_input("사용자 이름", placeholder="사용자 이름을 입력하세요")
-            email = st.text_input("이메일", placeholder="이메일 주소를 입력하세요")
-            
-            st.markdown("#### 🔒 비밀번호")
-            password = st.text_input("비밀번호", type="password", placeholder="비밀번호를 입력하세요")
-            confirm_password = st.text_input("비밀번호 확인", type="password", placeholder="비밀번호를 다시 입력하세요")
+# 이메일 입력
+email = st.text_input(
+    label="UserID",
+    placeholder="아이디",
+    label_visibility="collapsed" # label을 숨김 처리
+)
 
-            st.markdown("---")
-            
-            submitted = st.form_submit_button("✨ 가입하고 시작하기")
+# 비밀번호 입력
+password = st.text_input(
+    label="Password",
+    type="password",
+    placeholder="비밀번호",
+    label_visibility="collapsed" # label을 숨김 처리
+)
 
-            if submitted:
-                if not all([username, email, password, confirm_password]):
-                    st.error("모든 필드를 빠짐없이 입력해주세요.")
-                elif password != confirm_password:
-                    st.error("비밀번호가 일치하지 않습니다. 다시 확인해주세요.")
-                else:
-                    st.success(f"🎉 환영합니다, {username}님! 회원가입이 성공적으로 완료되었습니다.")
-                    st.info("잠시 후 메인 화면으로 이동합니다.")
-                    st.balloons()
+# 아이디 저장하기 체크박스
+st.checkbox("아이디 저장하기")
 
-                    # Set session state to log the user in
-                    st.session_state['logged_in'] = True
-                    st.session_state['username'] = username
-                    
-                    time.sleep(2) # Give user time to see the message
-                    st.switch_page("streamlit.py") # Redirect to the main page
+# --- 버튼들 ---
+login_button = st.button("Login", use_container_width=True, type="primary")
+signup_button = st.button("회원가입", use_container_width=True, key="signup_button")
 
-if __name__ == "__main__":
-    signup_page()
+# --- 로그인 로직 ---
+if login_button:
+    if email and password:
+        st.success(f"{email}님, 환영합니다!")
+    else:
+        st.error("이메일과 비밀번호를 모두 입력해주세요.")
+
+# --- 회원가입 로직 ---
+if signup_button:
+    st.info("회원가입 페이지로 이동합니다. (기능 구현 필요)")
