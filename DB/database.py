@@ -4,7 +4,7 @@ import os
 def confirm_db(): #DB가 연결됐는지 확인하는 함수
     db_file = 'my_data.db'
     
-    # DB 파일이 없는 경우를 대비한 예외 처리
+    #DB 파일이 없는 경우를 대비한 예외 처리
     if not os.path.exists(db_file):
         print(f"오류: '{db_file}' 데이터베이스 파일이 존재하지 않습니다.")
         print("데이터를 먼저 추가해주세요.")
@@ -20,8 +20,9 @@ def confirm_db(): #DB가 연결됐는지 확인하는 함수
         cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY,
-            username TEXT NOT NULL UNIQUE,
-            password_hash TEXT NOT NULL
+            userId TEXT NOT NULL UNIQUE,
+            password_hash TEXT NOT NULL,
+            username TEXT NOT NULL
         );
         """)
         
@@ -37,7 +38,7 @@ def confirm_db(): #DB가 연결됐는지 확인하는 함수
         # --- 3단계: 가져온 데이터 출력하기 ---
         print("\n[3단계] 현재 DB에 저장된 내용입니다.")
         print("==================================================================================")
-        print(" ID | USERNAME | PASSWORD HASH (암호화된 값)")
+        print(" ID | USERID | PASSWORD HASH (암호화된 값) | username")
         print("----------------------------------------------------------------------------------")
         
         if not all_users:
