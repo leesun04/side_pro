@@ -14,11 +14,11 @@ def login_user(userId, password): #로그인api 연결 함수
         print(f"Error during login request: {e}")
         return None
     
-def signup_user(userId, password): #회원가입 api 연결 함수
+def signup_user(userId, password, username): #회원가입 api 연결 함수
     try:
         response = requests.post(
             f"{API_URL}/signup",
-            data={"userId": userId, "password": password}
+            data={"userId": userId, "password": password, "username": username}
         )
         return response
     except requests.exceptions.RequestException as e:

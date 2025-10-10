@@ -21,8 +21,9 @@ elif st.session_state.page == 'signup':
 # 로그인 성공 후 보여줄 메인 대시보드 페이지
 elif st.session_state.logged_in:
     st.title("메인 대시보드")
-    st.write(f"{st.session_state.userId}님, 환영합니다! 여기가 메인 페이지입니다.")
+    st.write(f"{st.session_state.user_name}님, 환영합니다! 여기가 메인 페이지입니다.")
     if st.button("로그아웃"):
         st.session_state.logged_in = False
         st.session_state.page = 'login'
         st.rerun()
+#streamlit run main.py --server.address 0.0.0.0 --server.port 8501 실행

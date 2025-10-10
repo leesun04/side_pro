@@ -5,19 +5,19 @@ def login_page():
     st.title("로그인 페이지")
 
     # 앱이 처음 실행되거나 페이지가 새로고침 될 때 세션 상태 초기화
-    if 'logged_in' not in st.session_state: #로그인됐다는 거
+    if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
-    if 'userId' not in st.session_state: #로그인된 사용자가 있을대
-        st.session_state.userId = None
+    if 'user_id' not in st.session_state:
+        st.session_state.user_id = None
 
     def logout(): #UI 로그아웃 함수 -> 이건 ui에서 처리해야해서 일로 뺌
         st.session_state.logged_in = False
-        st.session_state.userId = None
-        st.success("로그아웃 되었습니다.")
+        st.session_state.user_id = None
+        st.toast("로그아웃 되었습니다.")
 
     #========================== UI 구성 ==========================
     if st.session_state.logged_in: #로그인 상태일 때
-        st.write(f"{st.session_state.userId}님, 환영합니다!")
+        st.write(f"{st.session_state.user_id}님, 환영합니다!")
         if st.button("로그아웃", use_container_width=True, on_click=logout):
             pass  # 로그아웃 함수는 on_click에서 처리됩니다.
         
@@ -43,8 +43,9 @@ def login_page():
                 st.error(f"로그인 실패: 서버 연결 불가")
             elif response.status_code == 200:
                 user_data = response.json() #로그인 성공 시 사용자 데이터
+                print(f"user_data: {user_data}") #디버깅용
                 st.session_state.logged_in = True #로그인 상태로 변경
-                st.session_state.userId = user_data.get("userId") #세션에 userId 저장
+                st.session_state.user_id = user_data.get("username")
                 st.rerun()  # 로그인 상태가 변경되었으므로 페이지를 다시 렌더링합니다.
             else:
                 error_data = response.json()

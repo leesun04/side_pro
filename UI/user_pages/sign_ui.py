@@ -19,7 +19,7 @@ def sign_up_page():
     # --- UI 구성 ---
     st.title("회원가입")
 
-    # 이메일 입력
+    # 아이디 입력
     userId = st.text_input(
         label="UserID",
         placeholder="아이디",
@@ -34,18 +34,32 @@ def sign_up_page():
         label_visibility="collapsed" # label을 숨김 처리
     )
 
+    username = st.text_input(
+        label="Username",
+        placeholder="이름",
+        label_visibility="collapsed" # label을 숨김 처리
+    )
+
     # --- 버튼들 ---
     signup_button = st.button("회원가입 완료", use_container_width=True, type="primary")
     back_button = st.button("로그인 페이지로 돌아가기", use_container_width=True)
 
     # --- 회원가입 로직 ---
     if signup_button:
-        # 여기에 실제 회원가입 API 호출 로직을 넣습니다.
-        st.success("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.")
-        st.session_state.page = 'login' # 로그인 페이지로 상태 변경
-        st.rerun()
-
+        if not userId or not password or not username:
+            st.error("모든 필드를 입력해주세요.")
+            return
+        response = services_login.signup_user(userId, password, username)
+        if response is None:
+            st.error("회원가입 실패: 서버 연결 불가")
+            return
+        elif response.status_code == 201:
+            st.session_state.page = 'login' # 로그인 페이지로 상태 변경
+            st.rerun()
+            st.success("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.")
+        else:
+            error_data = response.json()
+            st.error(error_data.get("detail", "회원가입 실패"))
     if back_button:
         st.session_state.page = 'login' # 로그인 페이지로 상태 변경
         st.rerun()
-

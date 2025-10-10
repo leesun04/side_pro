@@ -4,11 +4,11 @@ import os
 def confirm_db(): #DB가 연결됐는지 확인하는 함수
     db_file = 'my_data.db'
     
-    #DB 파일이 없는 경우를 대비한 예외 처리
-    if not os.path.exists(db_file):
-        print(f"오류: '{db_file}' 데이터베이스 파일이 존재하지 않습니다.")
-        print("데이터를 먼저 추가해주세요.")
-        return # 함수 종료
+    # #DB 파일이 없는 경우를 대비한 예외 처리
+    # if not os.path.exists(db_file):
+    #     print(f"오류: '{db_file}' 데이터베이스 파일이 존재하지 않습니다.")
+    #     print("데이터를 먼저 추가해주세요.")
+    #     return # 함수 종료
 
     # --- 1단계: 데이터베이스에 연결하기 ---
     with sqlite3.connect(db_file) as conn:
@@ -30,7 +30,7 @@ def confirm_db(): #DB가 연결됐는지 확인하는 함수
         print("\n[2단계] 저장된 모든 사용자 데이터를 조회합니다.")
         
         # 1. "users" 테이블에서 모든(*) 데이터를 선택(조회)하라고 명령
-        cur.execute("SELECT * FROM users;")
+        cur.execute("SELECT userId, username FROM users;")
         
         # 2. 위에서 실행한 조회 결과를 모두(all) 가져와서(fetch) all_users 변수에 저장
         all_users = cur.fetchall()
@@ -38,7 +38,7 @@ def confirm_db(): #DB가 연결됐는지 확인하는 함수
         # --- 3단계: 가져온 데이터 출력하기 ---
         print("\n[3단계] 현재 DB에 저장된 내용입니다.")
         print("==================================================================================")
-        print(" ID | USERID | PASSWORD HASH (암호화된 값) | username")
+        print("USERID | username")
         print("----------------------------------------------------------------------------------")
         
         if not all_users:
@@ -46,7 +46,7 @@ def confirm_db(): #DB가 연결됐는지 확인하는 함수
         else:
             for user in all_users:
                 # user[0] = id, user[1] = username, user[2] = password_hash
-                print(f" {user[0]:<2} | {user[1]:<8} | {user[2]}")
+                print(f" {user[0]:<2} | {user[1]:<8}")
         
         print("==================================================================================")
 
