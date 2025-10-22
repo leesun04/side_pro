@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Form
-
+from pydantic import BaseModel
 import hashlib # 비밀번호 암호화
 import sqlite3
 
@@ -11,48 +11,63 @@ db_PATH = "/mnt/nas4/lsj/side_project/DB/my_data.db" #DB 경로
 
 @router.post("/signup", status_code=status.HTTP_201_CREATED, summary="회원가입")
 async def signup(userId: str = Form(...), password: str = Form(...), username: str = Form(...)):
-   
-    hashed_password = hashlib.sha256(password.encode()).hexdigest() # 비밀번호 암호화
-    user_to_insert = (userId, hashed_password, username) #DB에 넣기전 튜플
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    user_to_insert = (userId, hashed_password, username)
 
     with sqlite3.connect(db_PATH) as conn:
         cur = conn.cursor()
         try:
             cur.execute("INSERT INTO users (userId, password_hash, username) VALUES (?, ?, ?);", user_to_insert)
-            #execute란 명령어를 실행하라고 하는거임
-            
-            # conn.commit() # -> 왜냐하면!!!!! with 구문 사용 시 자동으로 commit/close 되기 때문에 주석처리
         except sqlite3.IntegrityError:
-            # 중복 사용자가 있을때 발생하는 것
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="이미 존재하는 사용자입니다.",
             )
-    return {"message": f"{username}님 회원가입 환영한다!!!!!"}
+    return {"message": f"{username}님 회원가입 환영합니다!"}
 
-#===========================================================================================================================
 
 @router.post("/login", summary="로그인")
 async def login(userId: str = Form(...), password: str = Form(...)):
     with sqlite3.connect(db_PATH) as conn:
         cur = conn.cursor()
-        sql = "SELECT userId, password_hash, username FROM users WHERE userId = ?;" #해당 열들을 선택하겠다는 의미 -> userId와 password를 가져올거임ㅋ
-        #WHERE userId = ? 이거는 조건에 맞는 데이터만 가져오겠다는 필터
-    
-        cur.execute(sql, (userId,)) #명령어 실행 -> userId를 조회하기 시작
-        user = cur.fetchone() #조회한 결과를 가져오기 (없다면 None 반환)
+        # ✨ 2. 로그인 시 favorite 컬럼도 함께 조회
+        sql = "SELECT userId, password_hash, username, favorite FROM users WHERE userId = ?;"
+        cur.execute(sql, (userId,))
+        user = cur.fetchone()
+        
         if user is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="존재하는 사용자가 없습니다..",
-            )
-        stored_userId, stored_password_hash, username = user #DB에 있는 userId와 password_hash를 각각 변수에 저장
-        hashed_input_password = hashlib.sha256(password.encode()).hexdigest() #입력받은 비밀번호 암호화
-
-        if hashed_input_password != stored_password_hash: #입력받은 비밀번호랑 DB에 있는 비밀번호랑 비교하기
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="비밀번호가 틀렸습니다..",
+                detail="존재하는 사용자가 없습니다.",
             )
         
-        return {"message": "로그인 성공!", "username": username} #사용자 이름 반환 (토큰은 사용하지말자... 어렵다..)
+        stored_userId, stored_password_hash, username, favorite_driver = user
+        hashed_input_password = hashlib.sha256(password.encode()).hexdigest()
+
+        if hashed_input_password != stored_password_hash:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="비밀번호가 틀렸습니다.",
+            )
+        
+        # ✨ 3. 로그인 응답에 username과 favorite_driver를 함께 반환
+        return {"message": "로그인 성공!", "username": username, "favorite_driver": favorite_driver, "userId": stored_userId}
+
+# --- ✨ 4. 즐겨찾기 드라이버 업데이트를 위한 Pydantic 모델 ---
+class FavoriteDriverUpdate(BaseModel):
+    driver_name: str
+
+# --- ✨ 5. 즐겨찾기 드라이버를 업데이트하는 API 엔드포인트 ---
+@router.post("/{userId}/favorite", status_code=status.HTTP_200_OK, summary="대표 드라이버 저장")
+async def update_favorite(userId: str, favorite_update: FavoriteDriverUpdate):
+    with sqlite3.connect(db_PATH) as conn:
+        cur = conn.cursor()
+        # 사용자가 실제로 존재하는지 먼저 확인 (선택사항이지만 더 안전함)
+        cur.execute("SELECT id FROM users WHERE userId = ?", (userId,))
+        if cur.fetchone() is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="사용자를 찾을 수 없습니다.")
+            
+        # favorite 컬럼 업데이트
+        cur.execute("UPDATE users SET favorite = ? WHERE userId = ?", (favorite_update.driver_name, userId))
+
+    return {"message": "대표 드라이버가 성공적으로 저장되었습니다.", "favorite_driver": favorite_update.driver_name}

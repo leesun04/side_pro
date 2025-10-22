@@ -1,9 +1,8 @@
 import streamlit as st
-from services import services_login
+from run import signup_user
 
 def sign_up_page():
-    # --- CSS 스타일 ---
-    # 페이지의 모든 커스텀 스타일을 한 곳에 모아서 관리합니다.
+    # --- CSS 스타일 --- -> 가져온거긴 한데 흠 이건 바꿔야겠다
     st.markdown("""
     <style>
     /* 'st-emotion-cache-xxx'와 같은 자동 생성 클래스 이름을 무시하고 data-testid를 사용합니다. */
@@ -14,7 +13,7 @@ def sign_up_page():
         color: white;
     }
     </style>
-    """, unsafe_allow_html=True) # unsafe_allow_html=True 옵션을 사용하여 HTML/CSS가 적용되도록 합니다.
+    """, unsafe_allow_html=True) 
 
     # --- UI 구성 ---
     st.title("회원가입")
@@ -31,13 +30,13 @@ def sign_up_page():
         label="Password",
         type="password",
         placeholder="비밀번호",
-        label_visibility="collapsed" # label을 숨김 처리
+        label_visibility="collapsed" 
     )
 
     username = st.text_input(
         label="Username",
         placeholder="이름",
-        label_visibility="collapsed" # label을 숨김 처리
+        label_visibility="collapsed" 
     )
 
     # --- 버튼들 ---
@@ -49,7 +48,7 @@ def sign_up_page():
         if not userId or not password or not username:
             st.error("모든 필드를 입력해주세요.")
             return
-        response = services_login.signup_user(userId, password, username)
+        response = signup_user(userId, password, username)
         if response is None:
             st.error("회원가입 실패: 서버 연결 불가")
             return

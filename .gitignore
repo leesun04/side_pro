@@ -1,4 +1,8 @@
 __pycache__/
+.ipynb_checkpoints/
 *.log
 DB/my_data.db
 routers/__pycache__/ 
+DB/.ipynb_checkpoints/
+routers/__pycache__/
+Data/apikey.json
